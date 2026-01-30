@@ -6,8 +6,7 @@
     "baseUrl": ".", // This sets the base directory for path resolution
     "paths": {
       "@src/*": ["src/*"], // This maps "@/" to the "src/" directory
-      "@patterns/*": ["patterns/*"],
-      "@types/*": ["types/*"]
+      "@patterns/*": ["patterns/*"]
     },
     "esModuleInterop": true,
     // Environment Settings
