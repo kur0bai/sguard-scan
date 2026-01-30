@@ -2,8 +2,13 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    "rootDir": "./src",
     "outDir": "./dist",
+    "baseUrl": ".", // This sets the base directory for path resolution
+    "paths": {
+      "@src/*": ["src/*"], // This maps "@/" to the "src/" directory
+      "@patterns/*": ["patterns/*"],
+      "@types/*": ["types/*"]
+    },
     "esModuleInterop": true,
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
