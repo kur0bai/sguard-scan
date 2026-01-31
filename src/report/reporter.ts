@@ -1,7 +1,7 @@
 import chalk from "chalk";
-import { FindingReport } from "./types/report";
-import { severityColor } from "./reporter/colors";
-import { formatReason } from "./reporter/style";
+import { FindingReport } from "../types/report";
+import { severityColor } from "./colors";
+import { formatReason } from "./style";
 
 export function reportFinding(
   file: string,

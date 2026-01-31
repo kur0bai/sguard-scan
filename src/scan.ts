@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 import { loadGitignore } from "./gitignore";
-import { reportFinding } from "./reporter";
+import { reportFinding } from "./report/reporter";
 import { NOISYPATHS } from "./types/path";
 import { PATTERNS } from "./patterns";
 
