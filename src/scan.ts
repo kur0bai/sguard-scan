@@ -7,7 +7,9 @@ import { reportFinding } from "@src/reporter";
 import { NOISYPATHS } from "@src/types/path";
 import { PATTERNS } from "@src/patterns";
 
-import { passesEntropyCheck, passesContextChecks } from "@src/heuristics";
+import { calculateScore } from "@src/scoring";
+import { scoreToSeverity } from "@src/severity";
+import { MIN_SCORE_TO_REPORT } from "@src/constants/scoring";
 
 export function scanProject(root: string): void {
   const ig = loadGitignore(root);
@@ -24,22 +26,29 @@ export function scanProject(root: string): void {
 
     const fullPath = path.join(root, file);
     const content = fs.readFileSync(fullPath, "utf8");
-
     const lines = content.split("\n");
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+    for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+      const line = lines[lineNumber];
       if (!!line) {
+        if (!line.trim()) continue;
+
         for (const pattern of PATTERNS) {
           const match = line.match(pattern.compiled);
           if (!match) continue;
 
           const value = match[0];
 
-          if (!passesEntropyCheck(value, pattern)) continue;
-          if (!passesContextChecks(line, pattern)) continue;
+          const result = calculateScore(line, value, file, pattern);
 
-          reportFinding(file, i + 1, pattern);
+          if (result.score < MIN_SCORE_TO_REPORT) continue;
+
+          reportFinding(file, lineNumber + 1, {
+            ...pattern,
+            score: result.score,
+            reasons: result.reasons,
+            severity: scoreToSeverity(result.score),
+          });
         }
       }
     }

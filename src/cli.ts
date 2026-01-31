@@ -7,12 +7,12 @@ const program = new Command();
 
 program
   .name("sguard")
-  .description("Detecta secretos en tu código antes de hacer commit")
+  .description("Detect secrets in your code before commit")
   .version("0.1.0");
 
 program
   .command("scan")
-  .description("Escanea el proyecto en busca de secretos")
+  .description("Scan your project looking for your secrets")
   .action(() => {
     scanProject(process.cwd());
   });

@@ -1,8 +1,11 @@
-import chalk from "chalk";
-
-export function reportFinding(file: string, line: number, pattern: any) {
+export function reportFinding(file: string, line: number, finding: any) {
   console.log(
-    `${chalk.red("[!]")} ${file}: Line ${line} - ` +
-      `${chalk.bold(`[${pattern.severity}]`)} ${pattern.description}`,
+    `[${finding.severity} | score=${finding.score}] ` +
+      `${file}:${line} ${finding.description}`,
   );
+
+  for (const reason of finding.reasons) {
+    const sign = reason.value > 0 ? "+" : "";
+    console.log(`  ${sign}${reason.value} → ${reason.description}`);
+  }
 }
