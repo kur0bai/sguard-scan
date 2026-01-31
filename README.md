@@ -47,6 +47,25 @@ The same secret can have different severities depending on **where and how** it 
 
 ---
 
+## Continuous Security (CI)
+
+This project uses GitHub Actions to continuously monitor security risks:
+
+### ✔ Dependency Security
+
+- `npm audit` is executed on every pull request
+- Builds fail on **HIGH / CRITICAL** vulnerabilities
+
+### ✔ Code Scanning
+
+- GitHub CodeQL analyzes the codebase for security issues
+- Results are available under the repository’s **Security** tab
+
+These checks help ensure that even as an experimental project, sguard follows
+basic security best practices.
+
+---
+
 ### Explainable Results
 
 Every finding includes a breakdown of _why_ it was reported:
