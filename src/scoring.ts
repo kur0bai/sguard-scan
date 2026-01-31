@@ -1,7 +1,7 @@
-import { shannonEntropy } from "@src/entropy";
-import { SecretPattern } from "@src/types/pattern";
-import { ScoreResult, ScoreReason } from "@src/types/scoring";
-import { SguardConfig } from "@src/types/config";
+import { shannonEntropy } from "./entropy";
+import { SecretPattern } from "./types/pattern";
+import { ScoreResult, ScoreReason } from "./types/scoring";
+import { SguardConfig } from "./types/config";
 
 const SENSITIVE_NAMES = ["key", "token", "secret", "password", "auth"];
 

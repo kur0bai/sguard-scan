@@ -1,5 +1,5 @@
-import { SeverityLevel } from "@src/types/severity";
-import { SecretPattern } from "@src/types/pattern";
+import { SeverityLevel } from "./severity";
+import { SecretPattern } from "./pattern";
 
 export interface Finding {
   file: string;

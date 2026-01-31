@@ -1,5 +1,5 @@
-import { SeverityLevel } from "@src/types/severity";
-import { SguardConfig } from "@src/types/config";
+import { SeverityLevel } from "./types/severity";
+import { SguardConfig } from "./types/config";
 
 export function scoreToSeverity(score: number, config: SguardConfig) {
   if (score >= config.scoring.thresholds.high) return SeverityLevel.HIGH;

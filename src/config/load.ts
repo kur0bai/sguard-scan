@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import yaml from "js-yaml";
 import { DEFAULT_CONFIG } from "./default";
-import { SguardConfig } from "@src/types/config";
+import { SguardConfig } from "../types/config";
 
 export function loadConfig(root: string): SguardConfig {
   const configPath = path.join(root, ".sguardrc.yml");

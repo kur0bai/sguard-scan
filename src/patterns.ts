@@ -1,5 +1,5 @@
-import rawPatterns from "@patterns/secrets.json";
-import { SecretPattern } from "@src/types/pattern";
+import rawPatterns from "../patterns/secrets.json";
+import { SecretPattern } from "./types/pattern";
 
 export const PATTERNS = rawPatterns.map((p: SecretPattern) => ({
   ...p,

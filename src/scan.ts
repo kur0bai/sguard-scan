@@ -2,15 +2,15 @@ import fg from "fast-glob";
 import fs from "fs";
 import path from "path";
 
-import { loadGitignore } from "@src/gitignore";
-import { reportFinding } from "@src/reporter";
-import { NOISYPATHS } from "@src/types/path";
-import { PATTERNS } from "@src/patterns";
+import { loadGitignore } from "./gitignore";
+import { reportFinding } from "./reporter";
+import { NOISYPATHS } from "./types/path";
+import { PATTERNS } from "./patterns";
 
-import { calculateScore } from "@src/scoring";
-import { scoreToSeverity } from "@src/severity";
-import { MIN_SCORE_TO_REPORT } from "@src/constants/scoring";
-import { SguardConfig } from "@src/types/config";
+import { calculateScore } from "./scoring";
+import { scoreToSeverity } from "./severity";
+import { MIN_SCORE_TO_REPORT } from "./constants/scoring";
+import { SguardConfig } from "./types/config";
 
 export function scanProject(root: string, config: SguardConfig): void {
   const ig = loadGitignore(root);

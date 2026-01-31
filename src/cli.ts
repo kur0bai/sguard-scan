@@ -2,8 +2,8 @@
 
 import { Command } from "commander";
 import { scanProject } from "./scan";
-import { loadConfig } from "@src/config/load";
-import { initProject } from "@src/config/init";
+import { loadConfig } from "./config/load";
+import { initProject } from "./config/init";
 
 function main(): void {
   const program = new Command();

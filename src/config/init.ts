@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { CONFIG_TEMPLATE } from "@src/config/template";
+import { CONFIG_TEMPLATE } from "./template";
 
 export function initProject(root: string): void {
   const configPath = path.join(root, ".sguardrc.yml");

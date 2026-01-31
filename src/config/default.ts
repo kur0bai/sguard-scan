@@ -1,4 +1,4 @@
-import { SguardConfig } from "@src/types/config";
+import { SguardConfig } from "../types/config";
 
 export const DEFAULT_CONFIG: SguardConfig = {
   scoring: {

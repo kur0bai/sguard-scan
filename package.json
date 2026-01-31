@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "sguard": "./bin/sguard"
+    "sguard": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",

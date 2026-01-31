@@ -1,4 +1,4 @@
-import { SeverityLevel } from "@src/types/severity";
+import { SeverityLevel } from "./severity";
 
 export interface SecretPattern {
   id: string;
