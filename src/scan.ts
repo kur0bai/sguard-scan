@@ -10,8 +10,9 @@ import { PATTERNS } from "@src/patterns";
 import { calculateScore } from "@src/scoring";
 import { scoreToSeverity } from "@src/severity";
 import { MIN_SCORE_TO_REPORT } from "@src/constants/scoring";
+import { SguardConfig } from "@src/types/config";
 
-export function scanProject(root: string): void {
+export function scanProject(root: string, config: SguardConfig): void {
   const ig = loadGitignore(root);
 
   const files = fg.sync("**/*", {
@@ -39,7 +40,7 @@ export function scanProject(root: string): void {
 
           const value = match[0];
 
-          const result = calculateScore(line, value, file, pattern);
+          const result = calculateScore(line, value, file, pattern, config);
 
           if (result.score < MIN_SCORE_TO_REPORT) continue;
 
@@ -47,7 +48,7 @@ export function scanProject(root: string): void {
             ...pattern,
             score: result.score,
             reasons: result.reasons,
-            severity: scoreToSeverity(result.score),
+            severity: scoreToSeverity(result.score, config),
           });
         }
       }

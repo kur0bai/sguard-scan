@@ -1,6 +1,6 @@
 export interface ScoreReason {
   id: string;
-  description: string;
+  description?: string;
   value: number;
 }
 

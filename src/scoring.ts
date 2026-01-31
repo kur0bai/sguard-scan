@@ -1,6 +1,7 @@
 import { shannonEntropy } from "@src/entropy";
 import { SecretPattern } from "@src/types/pattern";
 import { ScoreResult, ScoreReason } from "@src/types/scoring";
+import { SguardConfig } from "@src/types/config";
 
 const SENSITIVE_NAMES = ["key", "token", "secret", "password", "auth"];
 
@@ -9,26 +10,28 @@ export function calculateScore(
   value: string,
   file: string,
   pattern: SecretPattern,
+  config: SguardConfig,
 ): ScoreResult {
-  const reasons: ScoreReason[] = [];
+  const { weights } = config.scoring;
+  const reasons = [];
   let score = 0;
 
-  score += 3;
+  score += weights.regex;
   reasons.push({
     id: "regex",
-    description: "Coincide con patrón conocido",
-    value: 3,
+    description: "Pattern matched",
+    value: weights.regex,
   });
 
   // entropy
   if (pattern.entropy) {
     const entropy = shannonEntropy(value);
-    if (entropy >= 3.5) {
-      score += 2;
+    if (entropy >= config.entropy.threshold) {
+      score += weights.entropy;
       reasons.push({
         id: "entropy",
-        description: "Alta entropía",
-        value: 2,
+        description: "High entropy detected",
+        value: weights.entropy,
       });
     }
   }
@@ -38,7 +41,7 @@ export function calculateScore(
     score += 2;
     reasons.push({
       id: "assignment",
-      description: "Valor asignado a variable",
+      description: "Assigned value detected",
       value: 2,
     });
   }
@@ -48,7 +51,7 @@ export function calculateScore(
     score += 2;
     reasons.push({
       id: "sensitive-name",
-      description: "Nombre de variable sensible",
+      description: "Sensitive variable name",
       value: 2,
     });
   }
@@ -58,7 +61,7 @@ export function calculateScore(
     score += 1;
     reasons.push({
       id: "sensitive-file",
-      description: "Archivo sensible",
+      description: "Sensitive file",
       value: 1,
     });
   }
@@ -74,7 +77,7 @@ export function calculateScore(
     score -= 3;
     reasons.push({
       id: "comment",
-      description: "Detectado en comentario",
+      description: "Detected a comment line",
       value: -3,
     });
   }
@@ -87,7 +90,7 @@ export function calculateScore(
     score -= 2;
     reasons.push({
       id: "noisy-path",
-      description: "Ruta ruidosa (tests/docs)",
+      description: "Noisy path (tests/docs)",
       value: -2,
     });
   }
