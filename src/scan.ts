@@ -11,6 +11,8 @@ import { calculateScore } from "./scoring";
 import { scoreToSeverity } from "./severity";
 import { MIN_SCORE_TO_REPORT } from "./constants/scoring";
 import { SguardConfig } from "./types/config";
+import { RuntimeSecretPattern } from "./types/pattern-runtime";
+import { detectContext } from "./context";
 
 export function scanProject(root: string, config: SguardConfig): void {
   const ig = loadGitignore(root);
@@ -25,33 +27,68 @@ export function scanProject(root: string, config: SguardConfig): void {
     if (ig.ignores(file)) continue;
     if (NOISYPATHS.some((p) => file.includes(p))) continue;
 
-    const fullPath = path.join(root, file);
-    const content = fs.readFileSync(fullPath, "utf8");
-    const lines = content.split("\n");
+    scanFile(file, root, config);
+  }
+}
 
-    for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
-      const line = lines[lineNumber];
-      if (!!line) {
-        if (!line.trim()) continue;
+/**
+ * Scan a single file
+ */
+function scanFile(
+  relativePath: string,
+  root: string,
+  config: SguardConfig,
+): void {
+  const fullPath = path.join(root, relativePath);
+  const content = fs.readFileSync(fullPath, "utf8");
+  const lines = content.split("\n");
 
-        for (const pattern of PATTERNS) {
-          const match = line.match(pattern.compiled);
-          if (!match) continue;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!!line) {
+      if (!line.trim()) continue;
 
-          const value = match[0];
-
-          const result = calculateScore(line, value, file, pattern, config);
-
-          if (result.score < MIN_SCORE_TO_REPORT) continue;
-
-          reportFinding(file, lineNumber + 1, {
-            ...pattern,
-            score: result.score,
-            reasons: result.reasons,
-            severity: scoreToSeverity(result.score, config),
-          });
-        }
-      }
+      scanLine(line, i + 1, relativePath, config);
     }
+  }
+}
+
+/**
+ * Scan a single line against all patterns
+ */
+function scanLine(
+  line: string,
+  lineNumber: number,
+  file: string,
+  config: SguardConfig,
+): void {
+  for (const pattern of PATTERNS as RuntimeSecretPattern[]) {
+    const match = pattern.compiled.exec(line);
+    if (!match) continue;
+
+    const value = match[0];
+
+    const result = calculateScore(line, value, file, pattern, config);
+
+    if (result.score < MIN_SCORE_TO_REPORT) continue;
+
+    /**
+     * Just for debugging purposes
+     */
+    /* const context = detectContext(file, line);
+    console.log({
+      file,
+      line,
+      assignmentStyle: context.assignmentStyle,
+      fileType: context.fileType,
+      runtime: context.runtime,
+    }); */
+
+    reportFinding(file, lineNumber, {
+      ...pattern,
+      score: result.score,
+      reasons: result.reasons,
+      severity: scoreToSeverity(result.score, config),
+    });
   }
 }

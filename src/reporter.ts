@@ -1,11 +1,26 @@
-export function reportFinding(file: string, line: number, finding: any) {
-  console.log(
-    `[${finding.severity} | score=${finding.score}] ` +
-      `${file}:${line} ${finding.description}`,
+import chalk from "chalk";
+import { FindingReport } from "./types/report";
+import { severityColor } from "./reporter/colors";
+import { formatReason } from "./reporter/style";
+
+export function reportFinding(
+  file: string,
+  line: number,
+  finding: FindingReport,
+): void {
+  const color = severityColor(finding.severity);
+
+  const header = chalk.bold(
+    color(`[${finding.severity} | score=${finding.score}]`),
   );
 
+  const location = chalk.gray(`${file}:${line}`);
+
+  console.log(`${header} ${location}  ${chalk.bold(finding.description)}`);
+
   for (const reason of finding.reasons) {
-    const sign = reason.value > 0 ? "+" : "";
-    console.log(`  ${sign}${reason.value} → ${reason.description}`);
+    console.log(formatReason(reason));
   }
+
+  console.log();
 }

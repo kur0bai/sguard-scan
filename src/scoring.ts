@@ -2,6 +2,7 @@ import { shannonEntropy } from "./entropy";
 import { SecretPattern } from "./types/pattern";
 import { ScoreResult, ScoreReason } from "./types/scoring";
 import { SguardConfig } from "./types/config";
+import { detectContext } from "./context";
 
 const SENSITIVE_NAMES = ["key", "token", "secret", "password", "auth"];
 
@@ -12,86 +13,97 @@ export function calculateScore(
   pattern: SecretPattern,
   config: SguardConfig,
 ): ScoreResult {
-  const { weights } = config.scoring;
-  const reasons = [];
+  const reasons: ScoreReason[] = [];
   let score = 0;
 
-  score += weights.regex;
-  reasons.push({
-    id: "regex",
-    description: "Pattern matched",
-    value: weights.regex,
-  });
+  const context = detectContext(file, line);
+  const { weights } = config.scoring;
 
-  // entropy
+  score += weights.regex;
+  reasons.push({ id: "regex", value: weights.regex });
+
+  /**
+   * Entropy check
+   */
   if (pattern.entropy) {
     const entropy = shannonEntropy(value);
     if (entropy >= config.entropy.threshold) {
       score += weights.entropy;
-      reasons.push({
-        id: "entropy",
-        description: "High entropy detected",
-        value: weights.entropy,
-      });
+      reasons.push({ id: "entropy", value: weights.entropy });
     }
   }
 
-  // if asigned
-  if (["=", ":", "=>"].some((op) => line.includes(op))) {
-    score += 2;
+  /**
+   * Assignment only code
+   */
+  if (context.assignmentStyle === "code") {
+    score += weights.assignment;
     reasons.push({
       id: "assignment",
-      description: "Assigned value detected",
-      value: 2,
+      description: "Value assigned in code",
+      value: weights.assignment,
     });
   }
 
-  // sensitive name
-  if (SENSITIVE_NAMES.some((n) => line.toLowerCase().includes(n))) {
-    score += 2;
+  /**
+   * Sensitive variable name check
+   */
+  if (
+    context.assignmentStyle === "code" &&
+    SENSITIVE_NAMES.some((n) => line.toLowerCase().includes(n))
+  ) {
+    score += weights.sensitive_name;
     reasons.push({
       id: "sensitive-name",
       description: "Sensitive variable name",
+      value: weights.sensitive_name,
+    });
+  }
+
+  /**
+   * Penalties
+   */
+  if (context.fileType === "manifest") {
+    score -= 1;
+    reasons.push({
+      id: "manifest-file",
+      description: "Manifest / declarative file",
+      value: -1,
+    });
+  }
+
+  if (context.runtime === "client" && pattern.category === "api-key") {
+    score -= 2;
+    reasons.push({
+      id: "client-runtime",
+      description: "Client-side API key",
+      value: -2,
+    });
+  }
+
+  if (context.fileType === "pipeline") {
+    score += 2;
+    reasons.push({
+      id: "pipeline-context",
+      description: "Secret in CI/CD pipeline",
       value: 2,
     });
   }
 
-  // sensitive file
-  if (file.includes(".env") || file.toLowerCase().includes("config")) {
-    score += 1;
-    reasons.push({
-      id: "sensitive-file",
-      description: "Sensitive file",
-      value: 1,
-    });
-  }
-
-  // penalties
+  /**
+   * Comment check
+   */
   const trimmed = line.trim();
-
   if (
     trimmed.startsWith("//") ||
     trimmed.startsWith("#") ||
     trimmed.startsWith("/*")
   ) {
-    score -= 3;
+    score -= weights.comment;
     reasons.push({
       id: "comment",
-      description: "Detected a comment line",
-      value: -3,
-    });
-  }
-
-  if (
-    file.includes("test") ||
-    file.includes("docs") ||
-    file.includes("__mocks__")
-  ) {
-    score -= 2;
-    reasons.push({
-      id: "noisy-path",
-      description: "Noisy path (tests/docs)",
-      value: -2,
+      description: "Detected in comment",
+      value: -weights.comment,
     });
   }
 
